@@ -32,4 +32,4 @@ Unzip is a small app that extracts a selected .ZIP archive to a selected
 destination directory. I had to make this because SentinelOne doesn't play nice
 with the Windows 11 File Explorer and broke the built-in Extract function. I
 got awful sick of having to get into the PowerShell every time someone needed a
-file extracted.
+file extracted, and County IT doesn't like 7zip, apparently.
