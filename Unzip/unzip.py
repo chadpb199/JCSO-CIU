@@ -215,7 +215,6 @@ class ActionButtons(ttk.Frame):
             target: str = Path for target file to be extracted.
             destination: str = Destination path for extracted files.
         """
-        print(target, destination, sep="\n")
         
         if target == "" or destination == "":
             messagebox.showerror(
@@ -229,7 +228,7 @@ class ActionButtons(ttk.Frame):
                 fill=tk.X
                 )
                 
-            self.progress.progress.start(25)
+            self.progress.progress.start()
             self.root.update()
             
             # Extract the .ZIP archive
