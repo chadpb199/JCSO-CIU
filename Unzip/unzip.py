@@ -2,25 +2,11 @@ import tkinter as tk
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
 from tkinter import filedialog
+from tkinter.simpledialog import Dialog
 from tkinter import messagebox
-import os
-    
-def extract_file(target: os.PathLike, destination: os.PathLike) -> None:
-    """
-    Extract the selected .ZIP archive to the selected destination.
-    
-    Args:
-        target: os.PathLike = Path object for file to be extracted
-        destination: os.PathLike = Path object for destination path for
-            extracted files
-    """
-    print(target, destination, sep="\n")
-    if target == "" or destination == "":
-        messagebox.showerror(
-            "Error",
-            "Please choose a target file and a destination path."
-            )
-    
+from threading import Thread
+import zipfile
+        
 
 class App(ttk.Window):
     """
@@ -165,16 +151,15 @@ class FileSelect(ttk.Frame):
             self.path.set(f)
         else:
             f = filedialog.askopenfilename()
-            # Check if the target file is a .ZIP archive
-            ext = f.rsplit(".", 1)[1]
             
-            if ext == "zip":
+            # Check if the target file is a .ZIP archive                        
+            if zipfile.is_zipfile(f):
                 self.path.set(f)
                 self.path_update()
             else:
                 messagebox.showerror(
                     "Error",
-                    "Selected file must be a .ZIP archive."
+                    "Selected file must be a valid .ZIP archive."
                     )
             
     def path_update(self) -> None:
@@ -205,7 +190,7 @@ class ActionButtons(ttk.Frame):
         self.extract_btn = ttk.Button(
             self,
             text="Extract",
-            command=lambda: extract_file(
+            command=lambda: self.extract_file(
                 self.root.target_file.path.get(),
                 self.root.destination_path.path.get()
                 )
@@ -215,14 +200,84 @@ class ActionButtons(ttk.Frame):
         self.cancel_btn = ttk.Button(
             self,
             text="Cancel",
-            command=lambda: self.root.destroy()
+            command=self.root.destroy
             )
             
         # Place the widgets
         self.cancel_btn.pack(side=tk.RIGHT, pady=5, padx=10)
         self.extract_btn.pack(side=tk.RIGHT, pady=5)
+     
+    def extract_file(self, target:str, destination:str) -> None:
+        """
+        Extract the selected .ZIP archive to the selected destination.
+        
+        Args:
+            target: str = Path for target file to be extracted.
+            destination: str = Destination path for extracted files.
+        """
+        print(target, destination, sep="\n")
+        
+        if target == "" or destination == "":
+            messagebox.showerror(
+                "Error",
+                "Please choose a target file and a destination path."
+                )
+        else:
+            self.progress = WorkingThrobber(self.root)
+            self.progress.pack(
+                side=tk.BOTTOM,
+                fill=tk.X
+                )
+                
+            self.progress.progress.start(25)
+            self.root.update()
+            
+            # Extract the .ZIP archive
+            extract = Thread(
+                target=self.unzip,
+                args=(target, destination),
+                daemon=True
+                )
+            extract.start()
+    
+    def unzip(self, target:str, destination:str):
+        with zipfile.ZipFile(target) as f:
+            f.extractall(path=destination)
+            
+        self.root.destroy()
+        
 
+
+class WorkingThrobber(ttk.Frame):
+        def __init__(self, parent):
+            super().__init__(parent)
+            
+            self.root = parent
+            
+            lbl = ttk.Label(
+                self,
+                text="""Extracting...
+This process may take several minutes, and the program may stop responding.
+This window will close when finished.""",
+                )
+            lbl.pack(
+                fill=tk.X,
+                padx=10,
+                pady=25,
+                )
+            
+            self.progress = ttk.Progressbar(
+                self,
+                mode="indeterminate",
+                maximum=25,
+                style="success"
+                )
+            self.progress.pack(
+                fill=tk.X,
+                padx=10,
+                pady=10
+                )
+                
         
 if __name__ == "__main__":
-    App()
-    
+    root = App()
