@@ -55,7 +55,7 @@ def finish_task(tasks:int = 1):
         sleep(1)
         
         # type the task completion comment and finish the task
-        keyboard.type("Case Assigned.")
+        keyboard.type("CASE ASSIGNMENT ACKNOWLEDGED")
         keyboard.press(k.Key.tab)
         keyboard.release(k.Key.tab)
         keyboard.press(k.Key.enter)
