@@ -150,7 +150,7 @@ class FileSelect(ttk.Frame):
             f = filedialog.askdirectory()
             self.path.set(f)
         else:
-            f = filedialog.askopenfilename()
+            f = filedialog.askopenfilenames()
             
             # Check if the target file is a .ZIP archive                        
             if zipfile.is_zipfile(f):
